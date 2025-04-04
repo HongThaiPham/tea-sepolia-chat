@@ -30,6 +30,7 @@ export default function ChatInput({ onMessageSent }: ChatInputProps) {
     console.log("Message sent with hash:", hash);
     if (hash) {
       onMessageSent(hash);
+      setMessage(""); // Clear the input after sending
     }
   };
 
