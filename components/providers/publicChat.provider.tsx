@@ -5,6 +5,7 @@ import {
   MESSAGE_FEE,
 } from "@/lib/constants";
 import { MessageType } from "@/types/Message.type";
+import { useQueryClient } from "@tanstack/react-query";
 import React, {
   PropsWithChildren,
   useCallback,
@@ -25,6 +26,7 @@ const PublicChatContext = React.createContext<
   PublicChatContextType | undefined
 >(undefined);
 const PublicChatProvider: React.FC<PropsWithChildren> = ({ children }) => {
+  const queryClient = useQueryClient();
   const publicClient = usePublicClient();
   const { data: walletClient } = useWalletClient();
   const { address } = useAccount();
@@ -92,14 +94,16 @@ const PublicChatProvider: React.FC<PropsWithChildren> = ({ children }) => {
         if (receipt?.status !== "success") {
           throw new Error("Transaction failed");
         }
-
+        await queryClient.invalidateQueries({
+          queryKey: ["blockchain-messages"],
+        });
         return hash;
       } catch (error) {
         console.error("Error sending message:", error);
         throw error;
       }
     },
-    [walletClient, publicClient, address]
+    [walletClient, address, publicClient, queryClient]
   );
 
   // Memoize the context value to prevent unnecessary re-renders
